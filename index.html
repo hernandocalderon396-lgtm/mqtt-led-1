@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de LED MQTT</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+      color: #333;
+      text-align: center;
+      padding-top: 100px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 40px;
+    }
+    button {
+      font-size: 1.5em;
+      padding: 20px 50px;
+      margin: 20px;
+      border: none;
+      border-radius: 15px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+    }
+    .on {
+      background-color: #28a745;
+    }
+    .off {
+      background-color: #dc3545;
+    }
+    button:hover {
+      transform: scale(1.1);
+    }
+    .status {
+      margin-top: 40px;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>💡 Control remoto LED (ESP32)</h1>
+  <button class="on" onclick="sendMessage('ON')">ENCENDER</button>
+  <button class="off" onclick="sendMessage('OFF')">APAGAR</button>
+  <div class="status" id="status">Conectando al servidor MQTT...</div>
+
+  <script>
+    // Conexión al broker público
+    const broker = "wss://mqtt-dashboard.com:8884/mqtt"; // conexión segura
+    const topic = "led/control"; // tema que escucha el ESP32
+    const clientId = "webClient-" + Math.random().toString(16).substr(2, 8);
+
+    const client = mqtt.connect(broker, { clientId });
+
+    const statusDiv = document.getElementById("status");
+
+    client.on("connect", () => {
+      console.log("✅ Conectado al broker MQTT");
+      statusDiv.innerHTML = "✅ Conectado al servidor MQTT";
+    });
+
+    client.on("error", (error) => {
+      console.error("❌ Error de conexión:", error);
+      statusDiv.innerHTML = "❌ Error al conectar";
+    });
+
+    function sendMessage(msg) {
+      client.publish(topic, msg);
+      statusDiv.innerHTML = "📤 Enviado: " + msg;
+      console.log("Mensaje enviado:", msg);
+    }
+  </script>
+</body>
+</html>
